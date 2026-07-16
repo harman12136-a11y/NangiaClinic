@@ -85,14 +85,16 @@ export default function HomePage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-purple-900/50 via-transparent to-transparent" />
             </div>
-            <div className="absolute -bottom-6 -left-6 h-32 w-32 overflow-hidden rounded-xl shadow-xl ring-2 ring-white/30 animate-float">
-              <Image
-                src={IMAGES.smile}
-                alt="Healthy smile"
-                fill
-                className="object-cover"
-                sizes="128px"
-              />
+            <div className="absolute -bottom-6 -left-6 h-32 w-32 animate-float">
+              <div className="relative h-full w-full overflow-hidden rounded-xl shadow-xl ring-2 ring-white/30">
+                <Image
+                  src={IMAGES.drNangia}
+                  alt={CLINIC.doctor.name}
+                  fill
+                  className="object-cover object-top"
+                  sizes="128px"
+                />
+              </div>
             </div>
           </div>
         </div>
