@@ -4,12 +4,12 @@ import { CLINIC, NAV_LINKS } from "@/lib/constants";
 
 export default function Footer() {
   return (
-    <footer className="mt-auto border-t border-border bg-primary text-white">
+    <footer className="hero-gradient mt-auto text-white">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-3">
         <div>
           <h3 className="mb-3 text-lg font-bold">{CLINIC.shortName}</h3>
-          <p className="mb-4 text-sm text-blue-100">{CLINIC.tagline}</p>
-          <div className="flex items-start gap-2 text-sm text-blue-100">
+          <p className="mb-4 text-sm text-white/75">{CLINIC.tagline}</p>
+          <div className="flex items-start gap-2 text-sm text-white/75">
             <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
             <span>
               {CLINIC.address.line1}
@@ -26,7 +26,7 @@ export default function Footer() {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className="text-sm text-blue-100 transition-colors hover:text-white"
+                  className="text-sm text-white/75 transition-colors hover:text-white"
                 >
                   {link.label}
                 </Link>
@@ -37,7 +37,7 @@ export default function Footer() {
 
         <div>
           <h3 className="mb-3 text-lg font-bold">Contact</h3>
-          <ul className="space-y-3 text-sm text-blue-100">
+          <ul className="space-y-3 text-sm text-white/75">
             <li className="flex items-center gap-2">
               <Phone className="h-4 w-4 shrink-0" />
               <a href={`tel:${CLINIC.phoneRaw}`} className="hover:text-white">
@@ -62,7 +62,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-blue-700 py-4 text-center text-sm text-blue-200">
+      <div className="border-t border-white/10 py-4 text-center text-sm text-white/60">
         &copy; {new Date().getFullYear()} {CLINIC.name}. All rights reserved.
       </div>
     </footer>

@@ -68,7 +68,7 @@ export default function AppointmentForm() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your full name"
-            className="w-full rounded-lg border border-border bg-white py-2.5 pl-10 pr-4 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className="w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
             required
           />
         </div>
@@ -86,7 +86,7 @@ export default function AppointmentForm() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="+91 XXXXX XXXXX"
-            className="w-full rounded-lg border border-border bg-white py-2.5 pl-10 pr-4 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className="w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
             required
           />
         </div>
@@ -100,7 +100,7 @@ export default function AppointmentForm() {
           id="service"
           value={service}
           onChange={(e) => setService(e.target.value)}
-          className="w-full rounded-lg border border-border bg-white px-4 py-2.5 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+          className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
           required
         >
           <option value="">Choose a service</option>
@@ -125,7 +125,7 @@ export default function AppointmentForm() {
               value={date}
               min={today}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full rounded-lg border border-border bg-white py-2.5 pl-10 pr-4 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
               required
             />
           </div>
@@ -141,7 +141,7 @@ export default function AppointmentForm() {
               id="time"
               value={time}
               onChange={(e) => setTime(e.target.value)}
-              className="w-full rounded-lg border border-border bg-white py-2.5 pl-10 pr-4 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
               required
             >
               <option value="">Select time</option>
@@ -158,7 +158,7 @@ export default function AppointmentForm() {
       <button
         type="submit"
         disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#268f72] disabled:cursor-not-allowed disabled:opacity-60"
+        className="btn-gradient flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? (
           <>
