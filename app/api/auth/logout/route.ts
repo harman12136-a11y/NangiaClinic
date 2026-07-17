@@ -1,7 +1,7 @@
-export function logout() {
-  // Clear login state
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('isAdmin')
-    window.location.href = '/login'
-  }
+import { NextResponse } from "next/server";
+import { destroySession } from "@/lib/session";
+
+export async function POST() {
+  await destroySession();
+  return NextResponse.json({ success: true });
 }

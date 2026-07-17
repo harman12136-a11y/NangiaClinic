@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { createSession, verifyPassword } from "@/lib/auth";
+import { verifyPassword } from "@/lib/auth";
+import { createSession } from "@/lib/session";
 
 export async function POST(request: Request) {
   try {
@@ -12,8 +13,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const valid = await verifyPassword(body.password);
-    if (!valid) {
+    if (!verifyPassword(body.password)) {
       return NextResponse.json({ error: "Invalid password." }, { status: 401 });
     }
 

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
-import { isAuthenticated } from "@/lib/auth";
-import { getAppointments, saveAppointments } from "@/lib/store";
+import { isAuthenticated } from "@/lib/session";
+import { getAppointments, addAppointment } from "@/lib/store";
 import type { Appointment, CreateAppointmentInput } from "@/lib/types/appointment";
 
 export async function GET() {
@@ -9,8 +9,7 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const appointments = await getAppointments();
-  const sorted = [...appointments].sort(
+  const sorted = getAppointments().sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
   return NextResponse.json(sorted);
@@ -36,9 +35,6 @@ export async function POST(request: Request) {
     updatedAt: now,
   };
 
-  const appointments = await getAppointments();
-  appointments.push(appointment);
-  await saveAppointments(appointments);
-
+  addAppointment(appointment);
   return NextResponse.json(appointment, { status: 201 });
 }

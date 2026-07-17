@@ -1,8 +1,7 @@
-export function getSession() {
-  // Simple check for a session cookie or flag
-  if (typeof window !== 'undefined') {
-    const loggedIn = localStorage.getItem('isAdmin') === 'true'
-    return { user: loggedIn ? 'admin' : null }
-  }
-  return { user: null }
+import { NextResponse } from "next/server";
+import { isAuthenticated } from "@/lib/session";
+
+export async function GET() {
+  const authenticated = await isAuthenticated();
+  return NextResponse.json({ authenticated });
 }

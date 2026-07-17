@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { isAuthenticated } from "@/lib/auth";
-import { getAppointments, saveAppointments } from "@/lib/store";
+import { isAuthenticated } from "@/lib/session";
+import { updateAppointment } from "@/lib/store";
 import type { AppointmentStatus, UpdateAppointmentInput } from "@/lib/types/appointment";
 
 interface RouteParams {
@@ -33,21 +33,14 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     );
   }
 
-  const appointments = await getAppointments();
-  const index = appointments.findIndex((a) => a.id === id);
-
-  if (index === -1) {
-    return NextResponse.json({ error: "Appointment not found." }, { status: 404 });
-  }
-
-  const updated = {
-    ...appointments[index],
+  const updated = updateAppointment(id, {
     ...body,
     updatedAt: new Date().toISOString(),
-  };
+  });
 
-  appointments[index] = updated;
-  await saveAppointments(appointments);
+  if (!updated) {
+    return NextResponse.json({ error: "Appointment not found." }, { status: 404 });
+  }
 
   return NextResponse.json(updated);
 }
