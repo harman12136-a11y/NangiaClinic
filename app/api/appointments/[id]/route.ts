@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/session";
 import { updateAppointment } from "@/lib/store";
-import type { AppointmentStatus, UpdateAppointmentInput } from "@/lib/types/appointment";
+import type { Appointment, AppointmentStatus, UpdateAppointmentInput } from "@/lib/types/appointment";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -37,10 +37,21 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       );
     }
 
-    const updated = updateAppointment(id, {
+    const updates: Partial<Appointment> = {
       ...body,
       updatedAt: new Date().toISOString(),
-    });
+    };
+
+    // Reschedule = update slot and auto-accept
+    if (body.status === "rescheduled") {
+      updates.status = "accepted";
+      updates.date = body.rescheduledDate!;
+      updates.time = body.rescheduledTime!;
+      delete updates.rescheduledDate;
+      delete updates.rescheduledTime;
+    }
+
+    const updated = updateAppointment(id, updates);
 
     if (!updated) {
       return NextResponse.json(

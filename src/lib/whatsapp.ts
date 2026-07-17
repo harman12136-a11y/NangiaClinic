@@ -35,13 +35,11 @@ Please arrive 10 minutes early. For any changes, call ${CLINIC.phone}.
 Thank you,
 ${CLINIC.doctor.name}`;
   } else {
-    const newDate = appointment.rescheduledDate ?? appointment.date;
-    const newTime = appointment.rescheduledTime ?? appointment.time;
-    message = `Hello ${appointment.name}, your appointment at ${CLINIC.shortName} has been RESCHEDULED.
+    message = `Hello ${appointment.name}, your appointment at ${CLINIC.shortName} has been RESCHEDULED and CONFIRMED.
 
 Service: ${appointment.service}
-New Date: ${formatDate(newDate)}
-New Time: ${newTime}
+New Date: ${formatDate(appointment.date)}
+New Time: ${appointment.time}
 
 If this time does not work for you, please call ${CLINIC.phone}.
 

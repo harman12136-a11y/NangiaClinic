@@ -149,9 +149,15 @@ export default function DoctorDashboard() {
       if (data && (status === "accepted" || status === "rescheduled")) {
         setWhatsappReminder({
           appointment: data,
-          type: status,
-          whatsappUrl: buildPatientWhatsAppUrl(data, status),
+          type: status === "rescheduled" ? "rescheduled" : "accepted",
+          whatsappUrl: buildPatientWhatsAppUrl(
+            data,
+            status === "rescheduled" ? "rescheduled" : "accepted",
+          ),
         });
+        if (status === "rescheduled") {
+          setActiveTab("accepted");
+        }
       } else if (status === "declined") {
         setToast({
           type: "success",
