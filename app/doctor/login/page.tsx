@@ -25,8 +25,15 @@ export default function DoctorLoginPage() {
         body: JSON.stringify({ password }),
       });
 
+      let data: { error?: string; success?: boolean } = {};
+      try {
+        data = (await res.json()) as typeof data;
+      } catch {
+        setError("Server error. Please try again.");
+        return;
+      }
+
       if (!res.ok) {
-        const data = (await res.json()) as { error?: string };
         setError(data.error ?? "Login failed.");
         return;
       }
@@ -60,15 +67,15 @@ export default function DoctorLoginPage() {
         </div>
 
         <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-2xl backdrop-blur-xl">
-          <div className="relative h-28 bg-gradient-to-r from-purple-900/60 to-sky-900/40">
+          <div className="relative h-32 overflow-hidden bg-gradient-to-r from-purple-900/60 to-sky-900/40">
             <Image
               src={IMAGES.drNangia}
               alt={CLINIC.doctor.name}
               fill
-              className="object-cover object-top opacity-40"
+              className="object-cover object-top"
               sizes="448px"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0b0618] to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0b0618] via-[#0b0618]/40 to-transparent" />
             <p className="absolute bottom-3 left-5 text-sm font-medium text-white/90">
               {CLINIC.doctor.name}
             </p>

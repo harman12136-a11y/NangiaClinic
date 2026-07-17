@@ -1,7 +1,11 @@
 import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
-import { getAdminData, saveAdminData } from "@/lib/store";
+import {
+  getAdminData,
+  saveAdminData,
+  setMemoryAdminHash,
+} from "@/lib/store";
 
 const SESSION_COOKIE = "doctor_session";
 const DEFAULT_PASSWORD = "nangia@123";
@@ -12,17 +16,39 @@ function getSecret(): Uint8Array {
   return new TextEncoder().encode(secret);
 }
 
+function getConfiguredPassword(): string {
+  return process.env.ADMIN_PASSWORD ?? DEFAULT_PASSWORD;
+}
+
 export async function ensureAdminPassword(): Promise<string> {
-  let admin = await getAdminData();
-  if (!admin?.passwordHash) {
-    const hash = await bcrypt.hash(DEFAULT_PASSWORD, 12);
-    admin = { passwordHash: hash };
-    await saveAdminData(admin);
+  if (process.env.ADMIN_PASSWORD_HASH) {
+    return process.env.ADMIN_PASSWORD_HASH;
   }
-  return admin.passwordHash;
+
+  const existing = await getAdminData();
+  if (existing?.passwordHash) {
+    return existing.passwordHash;
+  }
+
+  const hash = await bcrypt.hash(getConfiguredPassword(), 12);
+  setMemoryAdminHash(hash);
+
+  try {
+    await saveAdminData({ passwordHash: hash });
+  } catch {
+    // Read-only filesystem on serverless — in-memory hash is used
+  }
+
+  return hash;
 }
 
 export async function verifyPassword(password: string): Promise<boolean> {
+  const configured = getConfiguredPassword();
+  if (!process.env.ADMIN_PASSWORD_HASH && password === configured) {
+    const hash = await ensureAdminPassword();
+    return bcrypt.compare(password, hash);
+  }
+
   const hash = await ensureAdminPassword();
   return bcrypt.compare(password, hash);
 }
@@ -41,8 +67,16 @@ export async function changePassword(
       error: "New password must be at least 6 characters.",
     };
   }
+
   const hash = await bcrypt.hash(newPassword, 12);
-  await saveAdminData({ passwordHash: hash });
+  setMemoryAdminHash(hash);
+
+  try {
+    await saveAdminData({ passwordHash: hash });
+  } catch {
+    // Password updated in memory for this server instance
+  }
+
   return { success: true };
 }
 
