@@ -30,14 +30,29 @@ export default function AppointmentForm() {
     setLoading(true);
 
     try {
-      await sendBookingEmail({
+      const serviceLabel =
+        SERVICE_OPTIONS.find((s) => s.value === service)?.label ?? service;
+
+      const bookingData = {
         name: name.trim(),
         phone: phone.trim(),
-        service:
-          SERVICE_OPTIONS.find((s) => s.value === service)?.label ?? service,
+        service: serviceLabel,
         date,
         time,
+      };
+
+      await fetch("/api/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bookingData),
       });
+
+      try {
+        await sendBookingEmail(bookingData);
+      } catch {
+        // Email is optional; appointment is saved to dashboard
+      }
+
       router.push("/booking-confirmation");
     } catch {
       setError(
