@@ -8,39 +8,53 @@ interface RouteParams {
 }
 
 export async function PATCH(request: Request, { params }: RouteParams) {
-  if (!(await isAuthenticated())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  try {
+    if (!(await isAuthenticated())) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  const { id } = await params;
-  const body = (await request.json()) as UpdateAppointmentInput;
+    const { id } = await params;
+    const body = (await request.json()) as UpdateAppointmentInput;
 
-  const validStatuses: AppointmentStatus[] = [
-    "pending",
-    "accepted",
-    "declined",
-    "rescheduled",
-  ];
+    const validStatuses: AppointmentStatus[] = [
+      "pending",
+      "accepted",
+      "declined",
+      "rescheduled",
+    ];
 
-  if (body.status && !validStatuses.includes(body.status)) {
-    return NextResponse.json({ error: "Invalid status." }, { status: 400 });
-  }
+    if (body.status && !validStatuses.includes(body.status)) {
+      return NextResponse.json({ error: "Invalid status." }, { status: 400 });
+    }
 
-  if (body.status === "rescheduled" && (!body.rescheduledDate || !body.rescheduledTime)) {
+    if (
+      body.status === "rescheduled" &&
+      (!body.rescheduledDate || !body.rescheduledTime)
+    ) {
+      return NextResponse.json(
+        { error: "Rescheduled date and time are required." },
+        { status: 400 },
+      );
+    }
+
+    const updated = updateAppointment(id, {
+      ...body,
+      updatedAt: new Date().toISOString(),
+    });
+
+    if (!updated) {
+      return NextResponse.json(
+        { error: "Appointment not found." },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json(updated);
+  } catch (err) {
+    console.error("PATCH appointment error:", err);
     return NextResponse.json(
-      { error: "Rescheduled date and time are required." },
-      { status: 400 },
+      { error: "Failed to update appointment." },
+      { status: 500 },
     );
   }
-
-  const updated = updateAppointment(id, {
-    ...body,
-    updatedAt: new Date().toISOString(),
-  });
-
-  if (!updated) {
-    return NextResponse.json({ error: "Appointment not found." }, { status: 404 });
-  }
-
-  return NextResponse.json(updated);
 }

@@ -109,3 +109,47 @@ export const NAV_LINKS = [
   { href: "/contact", label: "Contact" },
   { href: "/book-appointment", label: "Book Appointment" },
 ] as const;
+
+export const REVIEWS = [
+  {
+    name: "Rahul D.",
+    rating: 5,
+    text: "Dr Rajat Nangia runs a thoroughly professional dental care setup. Hygiene and personalised care are hallmarks of this clinic. Extremely attentive, soft spoken, gentle and precise. Charges are very reasonable. Hats off!",
+    source: "Google Review",
+  },
+  {
+    name: "Happy Patient",
+    rating: 5,
+    text: "Got multiple treatments done here — RCTs, scaling, wisdom tooth extraction and every experience has been great! Dr. Rajat's hand is super steady and gentle. Service is top-notch. Totally recommend!",
+    source: "Google Review",
+  },
+  {
+    name: "Hemant",
+    rating: 5,
+    text: "Very nicely done. Great value for the treatment. Professional, caring and one of the best dental clinics in Paonta Sahib.",
+    source: "Google Review",
+  },
+  {
+    name: "Local Guide",
+    rating: 5,
+    text: "An awesome dental clinic! The office reflects genuine concern for patient comfort. Dr. Nangia has extensive knowledge, flawless technique and a warm bedside manner.",
+    source: "Google Review",
+  },
+  {
+    name: "Family Patient",
+    rating: 5,
+    text: "The clinic is well set up for both adults and children. Dr. Nangia and the staff are the utmost professionals — warm, caring and attentive to every patient's needs.",
+    source: "Google Review",
+  },
+  {
+    name: "Verified Patient",
+    rating: 5,
+    text: "Surely one of the finest dental clinics in Paonta Sahib. Sound knowledge, skilled hands, and a calm environment. Highly recommended for families.",
+    source: "Google Review",
+  },
+] as const;
+
+export const GOOGLE_RATING = {
+  score: 4.9,
+  totalReviews: "75+",
+} as const;

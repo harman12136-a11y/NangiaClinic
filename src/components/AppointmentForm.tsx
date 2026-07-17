@@ -2,13 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { Calendar, Clock, Loader2, Phone, User } from "lucide-react";
+import { Calendar, Clock, Loader2, Mail, Phone, User } from "lucide-react";
 import { SERVICE_OPTIONS, TIME_SLOTS } from "@/lib/constants";
-import { sendBookingEmail } from "@/lib/email";
 
 export default function AppointmentForm() {
   const router = useRouter();
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [service, setService] = useState("");
   const [date, setDate] = useState("");
@@ -22,8 +22,13 @@ export default function AppointmentForm() {
     e.preventDefault();
     setError("");
 
-    if (!name.trim() || !phone.trim() || !service || !date || !time) {
+    if (!name.trim() || !email.trim() || !phone.trim() || !service || !date || !time) {
       setError("Please fill in all fields.");
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError("Please enter a valid email address.");
       return;
     }
 
@@ -35,22 +40,23 @@ export default function AppointmentForm() {
 
       const bookingData = {
         name: name.trim(),
+        email: email.trim().toLowerCase(),
         phone: phone.trim(),
         service: serviceLabel,
         date,
         time,
       };
 
-      await fetch("/api/appointments", {
+      const res = await fetch("/api/appointments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bookingData),
       });
 
-      try {
-        await sendBookingEmail(bookingData);
-      } catch {
-        // Email is optional; appointment is saved to dashboard
+      if (!res.ok) {
+        const err = (await res.json()) as { error?: string };
+        setError(err.error ?? "Booking failed. Please try again.");
+        return;
       }
 
       router.push("/booking-confirmation");
@@ -83,6 +89,24 @@ export default function AppointmentForm() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your full name"
+            className="w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+            required
+          />
+        </div>
+      </div>
+
+      <div>
+        <label htmlFor="email" className="mb-1.5 block text-sm font-medium">
+          Email Address
+        </label>
+        <div className="relative">
+          <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="your@email.com"
             className="w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
             required
           />

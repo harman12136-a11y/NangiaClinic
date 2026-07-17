@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import AnimateIn from "@/components/AnimateIn";
 import DoctorPhoto from "@/components/DoctorPhoto";
+import ReviewsSection from "@/components/ReviewsSection";
 import { CLINIC, SERVICES } from "@/lib/constants";
 import { IMAGES } from "@/lib/images";
 
@@ -212,6 +213,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <ReviewsSection />
 
       <section className="py-16 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">

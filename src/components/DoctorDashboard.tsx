@@ -10,14 +10,18 @@ import {
   KeyRound,
   Loader2,
   LogOut,
+  Mail,
+  MessageCircle,
   Phone,
   RefreshCw,
   Settings,
+  TriangleAlert,
   User,
   X,
 } from "lucide-react";
 import { CLINIC, TIME_SLOTS } from "@/lib/constants";
 import { IMAGES } from "@/lib/images";
+import { buildPatientWhatsAppUrl } from "@/lib/whatsapp";
 import type { Appointment, AppointmentStatus } from "@/lib/types/appointment";
 
 const TABS: { key: AppointmentStatus; label: string; color: string }[] = [
@@ -69,15 +73,22 @@ export default function DoctorDashboard() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordMsg, setPasswordMsg] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [toast, setToast] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [whatsappReminder, setWhatsappReminder] = useState<{
+    appointment: Appointment;
+    type: "accepted" | "rescheduled";
+    whatsappUrl: string;
+  } | null>(null);
 
   const today = new Date().toISOString().split("T")[0];
 
   const fetchAppointments = useCallback(async () => {
-    const res = await fetch("/api/appointments");
+    const res = await fetch("/api/appointments", { credentials: "include" });
     if (res.status === 401) {
       router.push("/doctor/login");
       return null;
     }
+    if (!res.ok) return null;
     return (await res.json()) as Appointment[];
   }, [router]);
 
@@ -106,17 +117,52 @@ export default function DoctorDashboard() {
     extra?: { rescheduledDate?: string; rescheduledTime?: string },
   ) {
     setActionLoading(id);
+    setToast(null);
     try {
       const res = await fetch(`/api/appointments/${id}`, {
         method: "PATCH",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, ...extra }),
       });
-      if (res.ok) {
-        const data = await fetchAppointments();
-        if (data) setAppointments(data);
-        setRescheduleTarget(null);
+
+      let data: (Appointment & { error?: string }) | null = null;
+      try {
+        data = (await res.json()) as Appointment & { error?: string };
+      } catch {
+        setToast({ type: "error", text: "Server error. Please try again." });
+        return;
       }
+
+      if (!res.ok) {
+        setToast({
+          type: "error",
+          text: data?.error ?? `Failed to update (${res.status}).`,
+        });
+        return;
+      }
+
+      const list = await fetchAppointments();
+      if (list) setAppointments(list);
+      setRescheduleTarget(null);
+
+      if (data && (status === "accepted" || status === "rescheduled")) {
+        setWhatsappReminder({
+          appointment: data,
+          type: status,
+          whatsappUrl: buildPatientWhatsAppUrl(data, status),
+        });
+      } else if (status === "declined") {
+        setToast({
+          type: "success",
+          text: `Appointment declined for ${data?.name ?? "patient"}.`,
+        });
+      }
+    } catch {
+      setToast({
+        type: "error",
+        text: "Network error. Please check your connection and try again.",
+      });
     } finally {
       setActionLoading(null);
     }
@@ -215,6 +261,18 @@ export default function DoctorDashboard() {
       </header>
 
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+        {toast && (
+          <div
+            className={`mb-4 rounded-xl border px-4 py-3 text-sm ${
+              toast.type === "success"
+                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                : "border-amber-500/30 bg-amber-500/10 text-amber-300"
+            }`}
+          >
+            {toast.text}
+          </div>
+        )}
+
         {/* Stats */}
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {TABS.map((tab) => (
@@ -323,6 +381,12 @@ export default function DoctorDashboard() {
                       <StatusBadge status={appt.status} />
                     </div>
                     <div className="flex flex-wrap gap-4 text-sm text-slate-400">
+                      <span className="flex items-center gap-1.5">
+                        <Mail className="h-3.5 w-3.5" />
+                        <a href={`mailto:${appt.email}`} className="hover:text-sky-400">
+                          {appt.email}
+                        </a>
+                      </span>
                       <span className="flex items-center gap-1.5">
                         <Phone className="h-3.5 w-3.5" />
                         <a href={`tel:${appt.phone}`} className="hover:text-sky-400">
@@ -463,6 +527,61 @@ export default function DoctorDashboard() {
                 className="rounded-lg border border-white/10 px-4 py-2.5 text-sm text-slate-400 hover:text-white"
               >
                 Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* WhatsApp reminder modal */}
+      {whatsappReminder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-amber-500/30 bg-[#130d24] p-6 shadow-2xl">
+            <div className="mb-4 flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/15">
+                <TriangleAlert className="h-5 w-5 text-amber-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-amber-300">
+                  Send appointment info via WhatsApp
+                </h3>
+                <p className="mt-1 text-sm text-slate-400">
+                  Appointment{" "}
+                  {whatsappReminder.type === "accepted" ? "accepted" : "rescheduled"}{" "}
+                  for <strong className="text-white">{whatsappReminder.appointment.name}</strong>.
+                  No email was sent — please message the patient on WhatsApp with the
+                  confirmed details.
+                </p>
+              </div>
+            </div>
+
+            <div className="mb-5 rounded-lg border border-white/10 bg-white/5 p-3 text-sm text-slate-300">
+              <p>
+                <span className="text-slate-500">Phone:</span>{" "}
+                {whatsappReminder.appointment.phone}
+              </p>
+              <p className="mt-1">
+                <span className="text-slate-500">Service:</span>{" "}
+                {whatsappReminder.appointment.service}
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <a
+                href={whatsappReminder.whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#25D366] py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1fb855]"
+              >
+                <MessageCircle className="h-4 w-4" />
+                Open WhatsApp
+              </a>
+              <button
+                type="button"
+                onClick={() => setWhatsappReminder(null)}
+                className="rounded-lg border border-white/10 px-4 py-2.5 text-sm text-slate-400 hover:text-white"
+              >
+                Done
               </button>
             </div>
           </div>

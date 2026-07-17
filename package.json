@@ -9,7 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@emailjs/browser": "^4.4.1",
     "@upstash/redis": "^1.38.0",
     "bcryptjs": "^3.0.3",
     "jose": "^6.2.3",

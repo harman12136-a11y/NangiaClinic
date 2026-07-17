@@ -7,6 +7,7 @@ export type AppointmentStatus =
 export interface Appointment {
   id: string;
   name: string;
+  email: string;
   phone: string;
   service: string;
   date: string;
@@ -21,6 +22,7 @@ export interface Appointment {
 
 export interface CreateAppointmentInput {
   name: string;
+  email: string;
   phone: string;
   service: string;
   date: string;
@@ -32,8 +34,4 @@ export interface UpdateAppointmentInput {
   rescheduledDate?: string;
   rescheduledTime?: string;
   doctorNote?: string;
-}
-
-export interface AdminData {
-  passwordHash: string;
 }
