@@ -1,14 +1,12 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Loader2, Lock, Stethoscope } from "lucide-react";
 import { IMAGES } from "@/lib/images";
 import { CLINIC } from "@/lib/constants";
 
 export default function DoctorLoginPage() {
-  const router = useRouter();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -38,8 +36,8 @@ export default function DoctorLoginPage() {
         return;
       }
 
-      router.push("/doctor/dashboard");
-      router.refresh();
+      // Hard redirect so the new session cookie is picked up reliably
+      window.location.href = "/doctor/dashboard";
     } catch {
       setError("Unable to connect. Please try again.");
     } finally {

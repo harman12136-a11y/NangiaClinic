@@ -1,21 +1,17 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { getSessionSecret, SESSION_COOKIE } from "@/lib/session-config";
 
-const SESSION_COOKIE = "doctor_session";
-
-function getSecret(): Uint8Array {
-  const secret =
-    process.env.SESSION_SECRET ?? "dr-nangia-clinic-secret-key-2026";
-  return new TextEncoder().encode(secret);
-}
-
-export async function createSession(): Promise<void> {
-  const token = await new SignJWT({ role: "doctor" })
+export async function createSessionToken(): Promise<string> {
+  return new SignJWT({ role: "doctor" })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(getSecret());
+    .sign(getSessionSecret());
+}
 
+export async function createSession(): Promise<void> {
+  const token = await createSessionToken();
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
@@ -37,7 +33,7 @@ export async function isAuthenticated(): Promise<boolean> {
   if (!token) return false;
 
   try {
-    await jwtVerify(token, getSecret());
+    await jwtVerify(token, getSessionSecret());
     return true;
   } catch {
     return false;

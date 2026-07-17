@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { verifyPassword } from "@/lib/auth";
-import { createSession } from "@/lib/session";
+import { createSessionToken } from "@/lib/session";
+import { SESSION_COOKIE } from "@/lib/session-config";
 
 export async function POST(request: Request) {
   try {
@@ -17,8 +18,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid password." }, { status: 401 });
     }
 
-    await createSession();
-    return NextResponse.json({ success: true });
+    const token = await createSessionToken();
+    const response = NextResponse.json({ success: true });
+    response.cookies.set(SESSION_COOKIE, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return response;
   } catch (err) {
     console.error("Login error:", err);
     return NextResponse.json(
